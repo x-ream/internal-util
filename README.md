@@ -1,4 +1,4 @@
-# internal-util 简单的SQL拼写
+# internal-util xream.io 内部uitl
 
    
 [![license](https://img.shields.io/github/license/x-ream/internal-util.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
