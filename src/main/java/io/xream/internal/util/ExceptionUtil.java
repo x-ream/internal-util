@@ -39,7 +39,7 @@ public class ExceptionUtil {
                     || str.startsWith("io.vavr")
                     || str.startsWith("io.undertow")
                     || str.startsWith("io.xream.x7")
-                    || str.startsWith("io.xream.rey")
+                    || str.startsWith("io.xream.rey") && (!str.startsWith("io.xream.rey.api"))
                     || str.startsWith("io.opentracing");
         }
         return false;
@@ -49,10 +49,10 @@ public class ExceptionUtil {
         if (str.startsWith("org")) {
             return (str.startsWith("org.spring")
                     && !(
-                            str.startsWith("org.springframework.util.Assert")
+                    str.startsWith("org.springframework.util.Assert")
                             || str.startsWith("org.springframework.jdbc")
-                        )
-                    )
+            )
+            )
                     || str.startsWith("org.jboss");
         }
         return false;
@@ -73,7 +73,7 @@ public class ExceptionUtil {
                     || startWithIO(str)
                     || str.startsWith("com.sun");
             if (
-                    !notAppend
+                    !notAppend && !str.contains("BySpringCGLIB$$")
             ) {
                 msg += str;
                 msg += " ";
@@ -113,16 +113,6 @@ public class ExceptionUtil {
         return msg;
     }
 
-    public static Throwable unwrapThrowable(Throwable wrapped) {
-        Throwable unwrapped = wrapped;
-        while (true) {
-            if (unwrapped instanceof InvocationTargetException) {
-                unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
-            } else if (unwrapped instanceof UndeclaredThrowableException) {
-                unwrapped = ((UndeclaredThrowableException) unwrapped).getUndeclaredThrowable();
-            } else {
-                return unwrapped;
-            }
-        }
-    }
+
 }
+
