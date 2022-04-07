@@ -16,9 +16,6 @@
  */
 package io.xream.internal.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.UndeclaredThrowableException;
-
 public class ExceptionUtil {
 
     private ExceptionUtil() {
@@ -38,9 +35,19 @@ public class ExceptionUtil {
             return str.startsWith("io.github.resili")
                     || str.startsWith("io.vavr")
                     || str.startsWith("io.undertow")
+                    || str.startsWith("io.xream.sqli")
                     || str.startsWith("io.xream.x7")
                     || str.startsWith("io.xream.rey") && (!str.startsWith("io.xream.rey.api"))
                     || str.startsWith("io.opentracing");
+        }
+        return false;
+    }
+
+    private static boolean startWithCom(String str) {
+        if (str.startsWith("com")) {
+            return str.startsWith("com.sun")
+                    || str.startsWith("com.fasterxml")
+                    || str.startsWith("com.alibaba.fastjson");
         }
         return false;
     }
@@ -71,7 +78,7 @@ public class ExceptionUtil {
                     || startWithJava(str)
                     || startWithOrg(str)
                     || startWithIO(str)
-                    || str.startsWith("com.sun");
+                    || startWithCom(str);
             if (
                     !notAppend && !str.contains("BySpringCGLIB$$")
             ) {
@@ -99,7 +106,7 @@ public class ExceptionUtil {
                     || startWithJava(str)
                     || startWithOrg(str)
                     || startWithIO(str)
-                    || str.startsWith("com.sun");
+                    || startWithCom(str);
             if (
                     !notAppend
             ) {
