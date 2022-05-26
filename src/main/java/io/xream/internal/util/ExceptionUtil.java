@@ -35,9 +35,9 @@ public class ExceptionUtil {
             return str.startsWith("io.github.resili")
                     || str.startsWith("io.vavr")
                     || str.startsWith("io.undertow")
-                    || str.startsWith("io.xream.sqli")
+                    || (str.startsWith("io.xream.sqli") && (!str.startsWith("io.xream.sqli.util.ParserUtil")))
                     || str.startsWith("io.xream.x7")
-                    || str.startsWith("io.xream.rey") && (!str.startsWith("io.xream.rey.api"))
+                    || (str.startsWith("io.xream.rey") && (!str.startsWith("io.xream.rey.api")))
                     || str.startsWith("io.opentracing");
         }
         return false;
