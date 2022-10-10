@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.xream.internal-util</groupId>
     <artifactId>internal-util</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
     <name>internal-util</name>
     <description>http://internal-util.xream.io</description>
@@ -17,6 +17,7 @@
         <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
         <maven.test.skip>true</maven.test.skip>
         <fastjson.version>1.2.79</fastjson.version>
+        <jackson.version>2.11.3</jackson.version>
         <sl4j.version>1.7.26</sl4j.version>
     </properties>
 
@@ -24,7 +25,7 @@
         <connection>scm:git:https://github.com/x-ream/internal-util</connection>
         <developerConnection>scm:git:https://github.com/x-ream/internal-util</developerConnection>
         <url>scm:git:https://github.com/x-ream/internal-util</url>
-        <tag>1.0.0</tag>
+        <tag>1.2.0</tag>
     </scm>
 
     <licenses>
@@ -60,22 +61,35 @@
     <dependencyManagement>
         <dependencies>
 
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.alibaba</groupId>-->
+<!--                <artifactId>fastjson</artifactId>-->
+<!--                <version>${fastjson.version}</version>-->
+<!--            </dependency>-->
 
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
 
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>fastjson</artifactId>-->
+<!--            <version>${fastjson.version}</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${fastjson.version}</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

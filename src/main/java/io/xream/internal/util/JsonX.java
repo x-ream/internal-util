@@ -16,154 +16,182 @@
  */
 package io.xream.internal.util;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.type.MapType;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * 
- * 
  * @author Sim
- *
  */
-public class JsonX {
+public final class JsonX {
+
+	private static ObjectMapper objectMapper;
+
+	static {
+		if (objectMapper == null) {
+			objectMapper = new ObjectMapper();
+			objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+			objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			objectMapper.configure(DeserializationFeature.WRAP_EXCEPTIONS, true);
+			objectMapper.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, true);
+
+			JavaTimeModule javaTimeModule = new JavaTimeModule();
+
+			//LocalDateTime.class
+			javaTimeModule.addSerializer(LocalDateTime.class,new JsonSerializer<LocalDateTime>(){
+				@Override
+				public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+					jsonGenerator.writeNumber(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+				}
+			});
+
+			javaTimeModule.addDeserializer(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+				@Override
+				public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+					Long ts = jsonParser.getLongValue();
+					return Instant.ofEpochMilli(ts).atZone(ZoneId.systemDefault()).toLocalDateTime();
+				}
+			});
+
+			//LocalDate.class
+			javaTimeModule.addSerializer(LocalDate.class,new JsonSerializer<LocalDate>(){
+				@Override
+				public void serialize(LocalDate localDate, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+					long ts = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+					jsonGenerator.writeNumber(ts);
+				}
+			});
+			javaTimeModule.addDeserializer(LocalDate.class, new JsonDeserializer<LocalDate>() {
+				@Override
+				public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+					Long ts = jsonParser.getLongValue();
+					return Instant.ofEpochMilli(ts).atZone(ZoneId.systemDefault()).toLocalDate();
+				}
+			});
+
+			objectMapper.registerModule(javaTimeModule);
+		}
+	}
 
 	private JsonX(){}
 
-	public static String toJson(List list){
-		if (list == null)
-			return null;
-		if (list.isEmpty()){
-			return "[]";
-		}
-		return JSON.toJSONString(list);
+	protected static void config(ObjectMapper om) {
+		objectMapper = om;
 	}
-	
-	public static String toJson(Map map){
-		if (map == null)
-			return null;
-		if (map.isEmpty()){
-			return "{}";
-		}
-		return JSON.toJSONString(map);
-	}
-	
-	public static <T> List<T> toList(String json, Class<T> clz){
-		if (json == null || json.equals(""))
-			return new ArrayList<T>();
-		return JSON.parseArray(json, clz);
-	}
-	
-	public static Map toMap(String json){
-		if (json == null || json.equals(""))
-			return new HashMap();
-		return (Map) JSON.parse(json);
-	}
-	
-	public static String toJson(Object obj){
+
+	public static String toJson(Object obj) {
 		if (obj == null)
 			return null;
 		if (obj instanceof String)
 			return obj.toString();
-		return JSON.toJSONString(obj);
-	}
-	
-	public static <T> T toObject(String json, Class<T> clz){
-		if (json == null || json.equals(""))
-			return null;
-		if (clz == String.class)
-			return (T)json;
-		return JSON.parseObject(json, clz);
-	}
-	
-	public static <T> T toObject(Object jsonObject, Class<T> clz){
-		if (Objects.isNull(jsonObject))
-			return null;
-
-		return JSON.toJavaObject((JSON)jsonObject, clz);
-	}
-	
-	public static Map<String,Object> toMap(Object obj){
-		return (Map<String,Object>) JSON.toJSON(obj);
-	}
-	
-	public static boolean isJsonable(Class clz) {
-		if ( clz == String.class
-						|| clz == long.class || clz == Long.class 
-						|| clz == int.class || clz == Integer.class
-						|| clz == boolean.class || clz == Boolean.class
-						|| clz == double.class || clz == Double.class
-						|| clz == float.class || clz == Float.class
-						|| clz == short.class || clz == Short.class
-						|| clz == byte.class || clz == Byte.class
-						|| clz == BigDecimal.class || clz == Date.class
-						)
-			return false;
-		return true;
-	}
-	
-	public static Object toObjectByClassName(String unknown, String clzName){
-		if (StringUtil.isNullOrEmpty(unknown))
-			return null;
-		if (StringUtil.isNullOrEmpty(clzName))
-			return  unknown;
-
-		if (clzName.contains("java.util.List")){
-			int start = clzName.indexOf("<")+1;
-			int end = clzName.indexOf(">");
-			String actualTypeStr = clzName.substring(start,end);
-			try {
-				Class actualType = Class.forName(actualTypeStr);
-				return  toList(unknown,actualType);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (clzName.contains("java.util.Map")){
-			return  toMap(unknown);
-		}
-
-		Class clz = null;
 		try {
-			clz = Class.forName(clzName);
-
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
+			return objectMapper.writeValueAsString(obj);
+		} catch (Exception e) {
+			throw new JsonException(e);
 		}
-
-		if (clz == Long.class)
-			return  Long.valueOf(unknown);
-
-		if (clz == Integer.class)
-			return  Integer.valueOf(unknown);
-
-		if (clz == BigDecimal.class)
-			return  new BigDecimal(unknown);
-
-		if (clz == Double.class)
-			return  Double.valueOf(unknown);
-
-		if (clz == Float.class)
-			return  Integer.valueOf(unknown);
-
-		if (clz == Short.class)
-			return  Short.valueOf(unknown);
-
-		if (clz == Byte.class)
-			return  Byte.valueOf(unknown);
-
-		if (clz == String.class)
-			return  unknown;
-
-		if (clz == Date.class)
-			return  new Date(Long.valueOf(unknown));
-		if (clz == java.sql.Timestamp.class)
-			return  new java.sql.Timestamp(Long.valueOf(unknown));
-
-		return toObject(unknown,clz);
 	}
 
+	public static <T> T toObject(String json, Class<T> clzz) {
+		if (StringUtil.isNullOrEmpty(json))
+			return null;
+		if (clzz == String.class)
+			return (T)json;
+
+		try {
+			return objectMapper.readValue(json, clzz);
+		} catch (Exception e) {
+			throw new JsonException(e);
+		}
+
+	}
+
+
+	public static <T> T toObject(Object jsonObject, Class<T> clzz) {
+		if (jsonObject == null )
+			return null;
+		if (clzz == String.class)
+			return (T)jsonObject;
+
+		try {
+			return objectMapper.convertValue(jsonObject,clzz);
+		} catch (Exception e) {
+			throw new JsonException(e);
+		}
+	}
+
+	public static <E> List<E> toList(Object jsonObject, Class<E> clzz) {
+		if (jsonObject == null )
+			return null;
+		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(ArrayList.class, clzz);
+		try {
+			return objectMapper.convertValue(jsonObject,javaType);
+		} catch (Exception e) {
+			throw new JsonException(e);
+		}
+	}
+
+
+	public static <E> List<E> toList(String json,  Class<E> clzz) {
+		if (StringUtil.isNullOrEmpty(json))
+			return null;
+		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(ArrayList.class, clzz);
+		try {
+			return objectMapper.readValue(json, javaType);
+		} catch (Exception e) {
+			throw new JsonException(e);
+		}
+	}
+
+	public static <K,V> Map<K,V> toMap(String json, Class<K> kClzz, Class<V> vClZZ) {
+		if (StringUtil.isNullOrEmpty(json))
+			return null;
+		try {
+			MapType mapType = objectMapper.getTypeFactory().constructMapType(HashMap.class, kClzz,vClZZ);
+			return objectMapper.readValue(json, mapType);
+		}catch (Exception e) {
+			throw new JsonException(e);
+		}
+	}
+
+	public static Map toMap(String json) {
+		if (StringUtil.isNullOrEmpty(json))
+			return null;
+		try {
+			return objectMapper.readValue(json, Map.class);
+		}catch (Exception e) {
+			throw new JsonException(e);
+		}
+	}
+
+	public interface Customizer {
+
+		ObjectMapper customize();
+
+		default void onStarted(ObjectMapper objectMapper) {
+			config(objectMapper);
+		}
+	}
+
+	public static class JsonException extends RuntimeException {
+
+		public JsonException(Exception e) {
+			super(e);
+		}
+	}
 }
+
