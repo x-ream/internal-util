@@ -178,6 +178,17 @@ public final class JsonX {
 		}
 	}
 
+	public static Map toMap(Object obj) {
+		if (obj == null)
+			return null;
+		try {
+			String json = toJson(obj);
+			return objectMapper.readValue(json, Map.class);
+		}catch (Exception e) {
+			throw new JsonException(e);
+		}
+	}
+
 	public interface Customizer {
 
 		ObjectMapper customize();
