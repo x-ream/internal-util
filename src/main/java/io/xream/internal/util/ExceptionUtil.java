@@ -24,9 +24,14 @@ public class ExceptionUtil {
     private static boolean startWithJava(String str) {
         if (str.startsWith("java")) {
             return str.startsWith("java.lang.reflect")
+                    || str.startsWith("java.base/java.lang.reflect")
                     || str.startsWith("java.lang.Thread")
-                    || str.startsWith("javax")
-                    ||str.startsWith("jakarta");
+                    || str.startsWith("java.base/java.lang.Thread")
+                    || str.startsWith("java.base/java.lang.Iterable")
+                    || str.startsWith("java.base/jdk.")
+                    || str.startsWith("javax");
+        }else if(str.startsWith("jakarta.") || str.startsWith("jdk.")){
+            return true;
         }
         return false;
     }
