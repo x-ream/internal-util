@@ -25,19 +25,20 @@ public class ExceptionUtil {
         if (str.startsWith("java")) {
             return str.startsWith("java.lang.reflect")
                     || str.startsWith("java.lang.Thread")
-                    || str.startsWith("javax");
+                    || str.startsWith("javax")
+                    ||str.startsWith("jakarta");
         }
         return false;
     }
 
     private static boolean startWithIO(String str) {
         if (str.startsWith("io")) {
-            return str.startsWith("io.github.resili")
+            return str.startsWith("io.github")
                     || str.startsWith("io.vavr")
                     || str.startsWith("io.undertow")
                     || (str.startsWith("io.xream.sqli") && (!str.startsWith("io.xream.sqli.util.ParserUtil")))
                     || str.startsWith("io.xream.x7")
-                    || (str.startsWith("io.xream.rey") && (!str.startsWith("io.xream.rey.api")))
+                    || str.startsWith("io.opentelemetry")
                     || str.startsWith("io.opentracing");
         }
         return false;
@@ -47,7 +48,8 @@ public class ExceptionUtil {
         if (str.startsWith("com")) {
             return str.startsWith("com.sun")
                     || str.startsWith("com.fasterxml")
-                    || str.startsWith("com.alibaba.fastjson");
+                    || str.startsWith("com.alibaba")
+                    || str.startsWith("com.github");
         }
         return false;
     }
