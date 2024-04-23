@@ -67,7 +67,11 @@ public class ExceptionUtil {
                             || str.startsWith("org.springframework.jdbc")
             )
             )
-                    || str.startsWith("org.jboss");
+                    || str.startsWith("org.jboss")
+                    || str.startsWith("org.xnio")
+                    || str.startsWith("org.apache")
+                    || str.startsWith("org.eclipse")
+                    ;
         }
         return false;
     }
@@ -113,7 +117,9 @@ public class ExceptionUtil {
                     || startWithJava(str)
                     || startWithOrg(str)
                     || startWithIO(str)
-                    || startWithCom(str);
+                    || startWithCom(str)
+                    || str.contains("$$SpringCGLIB$$")
+                    || str.contains(".doFilter");
             if (
                     !notAppend
             ) {
